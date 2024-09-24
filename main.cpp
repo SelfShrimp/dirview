@@ -6,6 +6,9 @@
 #include <QTreeView>
 #include <QCommandLineParser>
 #include <QCommandLineOption>
+#include <QVBoxLayout>
+#include <QWidget>
+#include <QLineEdit>
 
 int main(int argc, char *argv[])
 {
@@ -34,8 +37,17 @@ int main(int argc, char *argv[])
         model.setOption(QFileSystemModel::DontUseCustomDirectoryIcons);
     if (parser.isSet(dontWatchOption))
         model.setOption(QFileSystemModel::DontWatchForChanges);
+
+    QWidget window;
+    QVBoxLayout *layout = new QVBoxLayout(&window);
+    QLineEdit filterLineEdit;
+    filterLineEdit.setPlaceholderText("Search");
+    layout->addWidget(&filterLineEdit);
+
     QTreeView tree;
     tree.setModel(&model);
+    layout->addWidget(&tree);
+
     if (!rootPath.isEmpty()) {
         const QModelIndex rootIndex = model.index(QDir::cleanPath(rootPath));
         if (rootIndex.isValid())
@@ -53,8 +65,13 @@ int main(int argc, char *argv[])
     // Make it flickable on touchscreens
     QScroller::grabGesture(&tree, QScroller::TouchGesture);
 
-    tree.setWindowTitle(QObject::tr("Dir View"));
-    tree.show();
+    QObject::connect(&filterLineEdit, &QLineEdit::textChanged, [&model](const QString &text) {
+        model.setNameFilters(QStringList() << "*" + text + "*");
+
+        //model.setNameFilterDisables(false);
+    });
+    window.setWindowTitle(QObject::tr("Dir View"));
+    window.show();
 
     return app.exec();
 }
