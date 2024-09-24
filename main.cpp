@@ -3,6 +3,7 @@
 #include <QCommandLineParser>
 #include <QFileSystemModel>
 #include <QFileIconProvider>
+#include <QHeaderView>
 #include <QLineEdit>
 #include <QScopedPointer>
 #include <QScreen>
@@ -10,6 +11,8 @@
 #include <QTreeView>
 #include <QVBoxLayout>
 #include <QWidget>
+
+#include <customfilesystemmodel.h>
 
 int main(int argc, char *argv[])
 {
@@ -27,7 +30,7 @@ int main(int argc, char *argv[])
     parser.addPositionalArgument("directory", "The directory to start in.");
     parser.process(app);
 
-    QFileSystemModel model;
+    CustomFileSystemModel model;
     model.setRootPath("");
     //hidden files and dir without self and parent link
     model.setFilter(QDir::AllEntries | QDir::NoDotAndDotDot | QDir::Hidden);
@@ -69,11 +72,11 @@ int main(int argc, char *argv[])
 
     QObject::connect(&filterLineEdit, &QLineEdit::textChanged, [&model](const QString &text) {
         model.setNameFilters(QStringList() << "*" + text + "*");
-
         //model.setNameFilterDisables(false);
     });
 
     window.setWindowTitle(QObject::tr("Dir View"));
+    window.resize(800, 600);
     window.show();
 
     return app.exec();
