@@ -1,14 +1,15 @@
 #include <QApplication>
+#include <QCommandLineOption>
+#include <QCommandLineParser>
 #include <QFileSystemModel>
 #include <QFileIconProvider>
+#include <QLineEdit>
+#include <QScopedPointer>
 #include <QScreen>
 #include <QScroller>
 #include <QTreeView>
-#include <QCommandLineParser>
-#include <QCommandLineOption>
 #include <QVBoxLayout>
 #include <QWidget>
-#include <QLineEdit>
 
 int main(int argc, char *argv[])
 {
@@ -25,21 +26,21 @@ int main(int argc, char *argv[])
     parser.addOption(dontWatchOption);
     parser.addPositionalArgument("directory", "The directory to start in.");
     parser.process(app);
-    QDir homeDir = QDir::home();
-    const QString rootPath = homeDir.path();
 
     QFileSystemModel model;
     model.setRootPath("");
     //hidden files and dir without self and parent link
     model.setFilter(QDir::AllEntries | QDir::NoDotAndDotDot | QDir::Hidden);
 
-    if (parser.isSet(dontUseCustomDirectoryIconsOption))
+    if (parser.isSet(dontUseCustomDirectoryIconsOption)) {
         model.setOption(QFileSystemModel::DontUseCustomDirectoryIcons);
-    if (parser.isSet(dontWatchOption))
+    }
+    if (parser.isSet(dontWatchOption)) {
         model.setOption(QFileSystemModel::DontWatchForChanges);
+    }
 
     QWidget window;
-    QVBoxLayout *layout = new QVBoxLayout(&window);
+    QScopedPointer<QVBoxLayout> layout(new QVBoxLayout(&window));
     QLineEdit filterLineEdit;
     filterLineEdit.setPlaceholderText("Search");
     layout->addWidget(&filterLineEdit);
@@ -48,8 +49,9 @@ int main(int argc, char *argv[])
     tree.setModel(&model);
     layout->addWidget(&tree);
 
-    if (!rootPath.isEmpty()) {
-        const QModelIndex rootIndex = model.index(QDir::cleanPath(rootPath));
+    const QString ROOT_PATH = QDir::home().path();
+    if (!ROOT_PATH.isEmpty()) {
+        const QModelIndex rootIndex = model.index(QDir::cleanPath(ROOT_PATH));
         if (rootIndex.isValid())
             tree.setRootIndex(rootIndex);
     }
@@ -70,6 +72,7 @@ int main(int argc, char *argv[])
 
         //model.setNameFilterDisables(false);
     });
+
     window.setWindowTitle(QObject::tr("Dir View"));
     window.show();
 
