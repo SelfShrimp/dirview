@@ -3,6 +3,7 @@
 #include <QCommandLineParser>
 #include <QFileSystemModel>
 #include <QFileIconProvider>
+#include <QPushButton>?
 #include <QHeaderView>
 #include <QLineEdit>
 #include <QScopedPointer>
