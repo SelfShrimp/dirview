@@ -15,12 +15,8 @@
 
 #include <customfilesystemmodel.h>
 
-int main(int argc, char *argv[])
+void setupCommandLineParser(QCommandLineParser &parser)
 {
-    QApplication app(argc, argv);
-
-    QCoreApplication::setApplicationVersion(QT_VERSION_STR);
-    QCommandLineParser parser;
     parser.setApplicationDescription("Qt Dir View Example");
     parser.addHelpOption();
     parser.addVersionOption();
@@ -29,27 +25,28 @@ int main(int argc, char *argv[])
     QCommandLineOption dontWatchOption("w", "Set QFileSystemModel::DontWatch");
     parser.addOption(dontWatchOption);
     parser.addPositionalArgument("directory", "The directory to start in.");
-    parser.process(app);
+}
 
-    CustomFileSystemModel model;
+void setupFileSystemModel(CustomFileSystemModel &model, const QCommandLineParser &parser)
+{
     model.setRootPath("");
-    //hidden files and dir without self and parent link
     model.setFilter(QDir::AllEntries | QDir::NoDotAndDotDot | QDir::Hidden);
 
-    if (parser.isSet(dontUseCustomDirectoryIconsOption)) {
+    if (parser.isSet("c")) {
         model.setOption(QFileSystemModel::DontUseCustomDirectoryIcons);
     }
-    if (parser.isSet(dontWatchOption)) {
+    if (parser.isSet("w")) {
         model.setOption(QFileSystemModel::DontWatchForChanges);
     }
+}
 
-    QWidget window;
+void setupUI(QWidget &window, CustomFileSystemModel &model, QLineEdit &filterLineEdit, QTreeView &tree)
+{
     QScopedPointer<QVBoxLayout> layout(new QVBoxLayout(&window));
-    QLineEdit filterLineEdit;
+
     filterLineEdit.setPlaceholderText("Search");
     layout->addWidget(&filterLineEdit);
 
-    QTreeView tree;
     tree.setModel(&model);
     layout->addWidget(&tree);
 
@@ -71,14 +68,35 @@ int main(int argc, char *argv[])
     // Make it flickable on touchscreens
     QScroller::grabGesture(&tree, QScroller::TouchGesture);
 
-    QObject::connect(&filterLineEdit, &QLineEdit::textChanged, [&model](const QString &text) {
-        model.setNameFilters(QStringList() << "*" + text + "*");
-        //model.setNameFilterDisables(false);
-    });
-
     window.setWindowTitle(QObject::tr("Dir View"));
     window.resize(800, 600);
-    window.show();
+}
 
+void setupFiltering(QLineEdit &filterLineEdit, CustomFileSystemModel &model)
+{
+    QObject::connect(&filterLineEdit, &QLineEdit::textChanged, [&model](const QString &text) {
+        model.setNameFilters(QStringList() << "*" + text + "*");
+    });
+}
+
+int main(int argc, char *argv[])
+{
+    QApplication app(argc, argv);
+
+    QCommandLineParser parser;
+    setupCommandLineParser(parser);
+    parser.process(app);
+
+    CustomFileSystemModel model;
+    setupFileSystemModel(model, parser);
+
+    QWidget window;
+    QLineEdit filterLineEdit;
+    QTreeView tree;
+    setupUI(window, model, filterLineEdit, tree);
+
+    setupFiltering(filterLineEdit, model);
+
+    window.show();
     return app.exec();
 }
