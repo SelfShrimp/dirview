@@ -3,7 +3,7 @@
 #include <QCommandLineParser>
 #include <QFileSystemModel>
 #include <QFileIconProvider>
-#include <QPushButton>?
+#include <QPushButton>
 #include <QHeaderView>
 #include <QLineEdit>
 #include <QScopedPointer>
@@ -27,17 +27,10 @@ void setupCommandLineParser(QCommandLineParser &parser)
     parser.addPositionalArgument("directory", "The directory to start in.");
 }
 
-void setupFileSystemModel(CustomFileSystemModel &model, const QCommandLineParser &parser)
+void setupFileSystemModel(CustomFileSystemModel &model)
 {
     model.setRootPath("");
     model.setFilter(QDir::AllEntries | QDir::NoDotAndDotDot | QDir::Hidden);
-
-    if (parser.isSet("c")) {
-        model.setOption(QFileSystemModel::DontUseCustomDirectoryIcons);
-    }
-    if (parser.isSet("w")) {
-        model.setOption(QFileSystemModel::DontWatchForChanges);
-    }
 }
 
 void setupUI(QWidget &window, CustomFileSystemModel &model, QLineEdit &filterLineEdit, QTreeView &tree)
@@ -88,7 +81,7 @@ int main(int argc, char *argv[])
     parser.process(app);
 
     CustomFileSystemModel model;
-    setupFileSystemModel(model, parser);
+    setupFileSystemModel(model);
 
     QWidget window;
     QLineEdit filterLineEdit;

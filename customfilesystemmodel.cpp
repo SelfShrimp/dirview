@@ -10,11 +10,22 @@ QVariant CustomFileSystemModel::data(const QModelIndex &index, int role) const {
         QFileInfo fileInfo = this->fileInfo(index);
         if (fileInfo.isDir()) {
             qint64 folderSize = calculateFolderSize(fileInfo.filePath());
-            return QString("%1 KB").arg(folderSize / (1024));
+            QString sizeString;
+
+            if (folderSize < 1024) {
+                sizeString = QString("%1 B").arg(folderSize);
+            } else if (folderSize < 1048576) {
+                sizeString = QString("%1 KB").arg(folderSize / 1024.0, 0, 'f', 2);
+            } else {
+                sizeString = QString("%1 MB").arg(folderSize / 1048576.0, 0, 'f', 2);
+            }
+
+            return sizeString;
         }
     }
     return QFileSystemModel::data(index, role);
 }
+
 
 qint64 CustomFileSystemModel::calculateFolderSize(const QString &folderPath) const {
     qint64 size = 0;

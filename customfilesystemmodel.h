@@ -5,6 +5,7 @@
 
 class CustomFileSystemModel : public QFileSystemModel
 {
+    Q_OBJECT
 public:
     explicit CustomFileSystemModel(QObject *parent = nullptr);
 
