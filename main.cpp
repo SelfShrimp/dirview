@@ -6,7 +6,6 @@
 #include <QPushButton>
 #include <QHeaderView>
 #include <QLineEdit>
-#include <QScopedPointer>
 #include <QScreen>
 #include <QScroller>
 #include <QTreeView>
@@ -35,7 +34,7 @@ void setupFileSystemModel(CustomFileSystemModel &model)
 
 void setupUI(QWidget &window, CustomFileSystemModel &model, QLineEdit &filterLineEdit, QTreeView &tree)
 {
-    QScopedPointer<QVBoxLayout> layout(new QVBoxLayout(&window));
+    QVBoxLayout *layout = new QVBoxLayout(&window);
 
     filterLineEdit.setPlaceholderText("Search");
     layout->addWidget(&filterLineEdit);
